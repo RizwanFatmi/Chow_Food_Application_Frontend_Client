@@ -1,7 +1,9 @@
 import logo from './logo.svg';
 import './App.css';
 
-import React from "react";
+import React, {useEffect} from "react";
+import { useDispatch } from 'react-redux';
+import { loadUser } from './actions/userActions';
 import {
   BrowserRouter,
   Routes,
@@ -9,7 +11,6 @@ import {
   Route,
   Link
 } from "react-router-dom";
-
 import HomePage from './Screen/HomePage';
 import LoginPage from'./Screen/LoginPage';
 import RegisterPage from'./Screen/RegisterPage';
@@ -21,6 +22,13 @@ import CartScreen from './Screen/CartScreen';
 import MyOrderScreen from './Screen/MyOrderScreen';
 
 function App() {
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(loadUser());
+  }, [dispatch]);
+  
   return (
     <div>
     <BrowserRouter>
@@ -28,11 +36,11 @@ function App() {
     <Route path='/' element = {<HomePage/>}/>
     <Route path='/login' element = {<LoginPage/>}/>
     <Route path='/register' element = {<RegisterPage/>}/>
-    <Route path='/FoodEntry' element = {<AddFood/>}/>
-    <Route path='/UserList' element = {<UserList/>}/>
-    <Route path='/OrderList' element = {<OrderList/>}/>
+    <Route path='/admin/food-entry' element = {<AddFood/>}/>
+    <Route path='/admin/user-list' element = {<UserList/>}/>
+    <Route path='/admin/order-list' element = {<OrderList/>}/>
     <Route path='/cart' element = {<CartScreen/>}/>
-    <Route path='/MyOrder' element = {<MyOrderScreen/>}/>
+    <Route path='/my-order' element = {<MyOrderScreen/>}/>
 
 
 

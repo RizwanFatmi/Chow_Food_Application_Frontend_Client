@@ -1,98 +1,99 @@
-import React, {useState} from 'react'
+import React, {useState,useEffect} from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../actions/userActions';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 export default function Login() {
 
   const navigate = useNavigate();
- 
-  const[login,setLogin] = useState({
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const { user } = useSelector((state) => state.user);
+  const[users,setUser] = useState({
   email: "",password: ""
   });
+
+
+  useEffect(() => {
+    if(user){
+      if(user.role == "User"){
+      navigate("/");
+      }
+      else{
+        navigate("/admin/food-entry");
+      }
+    }
+  }, [user]);
 
 let name,value;
 
 
   const handleInputs = (e) =>{
-    console.log(e);
     name = e.target.name;
     value = e.target.value;
-
-    setLogin({...login, [name]:value});
-
+    setUser({...users, [name]:value});
   }
 
 const PostData = async (e) => {
     e.preventDefault();
-
-    const {email, password} = login; 
-
-    if(email=='admin'&& password=='12345'){
-      navigate("/FoodEntry",{replace:true}); 
-    }
-
-    else{
-
-    const res =  await fetch("/api/auth/login",{
-      method: "POST",
-      headers:{
-        "Content-Type" : "application/json"
-      },
-      body: JSON.stringify({
-       email, password
-      })
-   
-    });
-
-    const data = await res.json();
-
-    if(res.status===400){
-
-      alert("Please try to login with correct credentials");
-    }
-     
-    else if(res.status===500){
-      console.log(data)
-      alert("Server Error");
+    if(users.email == "" || users.password == "" ){
+      toast.error("email Id and password cannot be black")
     }
     else{
-      
-     
-      navigate("/",{replace:true});
-      
+      setLoading(true);
+       await dispatch(loginUser(users)); 
+       setLoading(false);
     }
-  }
-    
 }
-  return ( 
+
+
+
+  return ( <>
     <div>
       
 
-      <div className='alt'>
-      <div className="container-sm orange">
-        <div class="LoginLogo"><b>Admin/User Login</b></div>
-  <form className="px-4 py-3" method='POST'>
-    <div className="mb-3">
+      <div className='al px-4'>
+      
+      <div className="container-sm shadow pt-3 ">
+        <div class="LoginLogo">Login</div>
+  <form className="px-4 pt-1 pb-3" method="POST" >
+    <div className="mb-1">
       <label htmlfor="email" className="form-label"></label>
-      <input type="email" className="form-control" id="email" name='email'
-         value = {login.email}
+      <input type="email" className="form-control  py-2" id="email" name='email'
+         value = {users.email}
          onChange = {handleInputs}
       placeholder="Email ID"/>
     </div>
-    <div className="mb-3">
+    <div className="mb-1">
       <label for="password" className="form-label"></label>
-      <input type="password" className="form-control" id="password" name='password'
-       value = {login.password}
+      <input type="password" className="form-control  py-2" id="password" name='password'
+       value = {users.password}
        onChange = {handleInputs}
       placeholder="Password"/>
     </div>
+    <div style= {{textAlign: "center"}}>
     
-    <button type="submit" className="btn btn-outline-primary" onClick={PostData} >Login </button>
-    <a href = "/register"><button type="button" className="btn btn-outline-primary ">Register</button></a>
+    {loading?
+   <button className="navButton mt-4 mb-1" style= {{borderRadius: '5px', width: "100%"}}>
+     <div class="spinner-border" role="status" style={{fontSize: "8px", height: "20px", width: "20px", marginBottom: "-4px"}}>
+      </div>
+    </button>  :
+     <button type="submit" className="navButton mt-4 mb-1" onClick={PostData} style= {{borderRadius: '5px', width: "100%"}}>Login</button>     
+  }
+    <p style={{fontSize: "14px"}}>Don't have an Account? <span className="" style={{color: "#2980B9", fontWeight: "500", cursor: "pointer"}} onClick={()=>navigate('/register')}>Sign up</span></p>
+    </div>
   </form>
  
   </div>
 </div>
       
     </div>
-  )
+       <ToastContainer
+       position="top-center"
+       autoClose={5000}
+       />
+ </> )
 }

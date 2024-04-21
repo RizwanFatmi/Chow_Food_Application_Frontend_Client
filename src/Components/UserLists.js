@@ -1,5 +1,14 @@
 import React, {useEffect, useState} from 'react'
 import { Row } from 'react-bootstrap';
+import Loading from './Loading';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from "react-redux";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import { IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowBack } from "react-icons/io";
+
 
 
 
@@ -7,77 +16,157 @@ import { Row } from 'react-bootstrap';
 export default function UserLists() {
  
   const [userData, setUserData] = useState([]);
+  const { user } = useSelector((state) => state.user);
+  const [mainLoading, setMainLoading] = useState(true);
+  const navigate = useNavigate();
+
+
+
+
   
-  const API = "/api/auth/userlist";
-const fetchUser = async (url) => {
-  
-     const res = await fetch(url);
-     const data = await res.json();
-    if(data.length > 0){
-      setUserData(data);
-    }  
+  const userStatus1 =  () => {
+
+    toast.warn("This function is under maintenance")
+  }
+   const fetchUser = async () => {
+     setMainLoading(true);
+     const res = await fetch("/api/auth/userlist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        currentPage,
+        pageSize: 10, 
+      }),
+    });
+    const data = await res.json();
+    if (data.user.length > 0) {
+      setUserData(data.user);
+      setTotalPages(data.totalPages);
+      setTotalItem(data.totalItems);
+      const timeoutId = setTimeout(() => {
+        setMainLoading(false);
+    }, 3000);
+  } else {
+    // If no data is fetched, immediately set loading to false
+    setMainLoading(false);
+}
 }
 
-
+const userRole = localStorage.getItem("UserType");
   useEffect(() =>{
-    fetchUser(API);
+    if(userRole == "Admin"){
+      fetchUser();
+    }
+    else{
+      navigate('/login');
+    }
+  },[user])
+
+  // DATE FORMAT FUNCTION:
+
+  const formatDate=(inputDate)=> {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const date = new Date(inputDate);
+    const day = date.getDate();
+    const monthIndex = date.getMonth();
+    const year = date.getFullYear().toString().substr(-2);
+    return `${day} ${months[monthIndex]}' ${year}`;
+  }
+
   
-  },[])
 
 
-  //
-
-  
+  // ACTIVE AND INACTIVE USER:
 
 
-  const DeleteUser = async (_id) =>{
-    const res =  await fetch("/api/auth/deleteuser",{
+  const ActiveUser=async(_id)=>{
+    const status = "Active";
+    const res =  await fetch("/api/auth/changeuserstatus",{
       method: "POST",
       headers:{
         "Content-Type" : "application/json"
       },
       body: JSON.stringify({
-       _id
+       _id,status
       })
     
-    });
-    
+    }); 
     const data = await res.json();
-    
-    if(res.status===500){
-    
-      alert("Cannot Delete!! Server Error");
+    if(res.status===200){
+      fetchUser();
+      toast.success("User is active now");
     }
-     
     else{
-  
-      
-     
-      alert("User Deleted succesfully");
-      window.location.reload();
-      
+      toast.error("Server Error");
+    
     }
 
   }
 
-  return ( 
-    <div className='ud'>
-
+  const DeActiveUser=async(_id)=>{
+    const status = "De-active";
+    const res =  await fetch("/api/auth/changeuserstatus",{
+      method: "POST",
+      headers:{
+        "Content-Type" : "application/json"
+      },
+      body: JSON.stringify({
+       _id,status
+      })
     
-<div className="container-lg" >
+    }); 
+    const data = await res.json();
+    if(res.status===200){
+      fetchUser();
+      toast.success("User is not active now");
+    }
+    else{
+      toast.error("Server Error");
 
-<div class="LoginLogo"><b>User List</b></div>
+    }
+  }
 
-<table className="table table-light" >
-  <thead>
+
+  // Handle paginations:
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItem, setTotalItem] = useState(0);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  
+  useEffect(() => {
+    fetchUser();
+}, [currentPage]);
+
+  return (<>
+    {mainLoading && userData.length === 0 ? (<>
+      <Loading />
+    </>) : (<>  
+      {userData && userData.length > 0 ? (<>   
+        <div className='ud px-4'>
+
+<p style={{fontSize: "22px", fontWeight: "500", color: "#2980B9", textAlign: "center"}}>User List</p>
+<div className="container-lg lg2 mt-1" style={{ overflowX: "auto" }}>
+<table className="table m-0" style={{ backgroundColor: "white" }}>
+<thead style={{ backgroundColor: "#2980B9", color: "white", position: "sticky", top: 0, zIndex: 1 }}>
     <tr>
-      <th scope="col">S.no</th>
       <th scope="col">Name</th>
+      <th scope="col">User Since</th>
+      <th scope="col" style={{textAlign: "center"}}>Status</th>
       <th scope="col">Address</th>
       <th scope="col">Mobile</th>
       <th scope="col">Email ID</th>
-      <th scope="col">Password</th>
-      <th scope="col">Delete</th>
+      <th scope="col" style={{textAlign: "center"}}>Action</th>
+   
+
     </tr>
   </thead>
   <tbody>
@@ -85,15 +174,27 @@ const fetchUser = async (url) => {
   
   
   <tr key ={index}>
-      <td>{index+1}</td>
-      <td>{userData.name}</td>
-      <td>{userData.address}</td>
-      <td>{userData.mobile}</td>
-      <td>{userData.email}</td>
-      <td>{userData.password}</td>
-      <td> 
-      <img src={require('./Images/Delete.jpg')} className=" btn btn2 btn-outline-danger" onClick={()=>DeleteUser(userData._id)} ></img>
-     </td>
+      <td style={{maxWidth: "200px"}}>{userData.name}</td>
+      <td>{formatDate(userData.dateCreated)}</td>
+      <td style={{textAlign:"center"}}>
+       {userData.active?
+        <p className=" mb-0  mx-auto" style={{color: "#11870C", backgroundColor: "#DEF8DC", borderRadius: "2px", fontSize: "13px", paddingBottom: "2px", marginTop: '3px', width: "100px"}}>Active</p>:
+        <p className=" mb-0  mx-auto" style={{color: "#F00606", backgroundColor: "#FFEBEB", borderRadius: "2px", fontSize: "13px", paddingBottom: "2px", marginTop: '3px', width: "100px"}}>Not active</p>
+       }
+        </td>
+
+      <td style={{maxWidth: "200px"}}>{userData.address}</td>
+      <td>{(userData.mobile).slice(0,10)}</td>
+      <td>{userData.email.slice(0, 30)} <br />{" "}
+      {userData.email.slice(30, 60)}</td>
+      <td style={{textAlign: "center", minWidth: "120px"}}>
+      {userData.active?
+        <button className="navButton" style= {{borderRadius: '5px', fontSize: "14px"}} onClick={()=>DeActiveUser(userData._id)}>De-Active</button>:
+        <button className="navButton" style= {{borderRadius: '5px', fontSize: "14px"}} onClick={()=>ActiveUser(userData._id)}>Active</button>
+       }
+      </td>
+      
+
      
     </tr>
   
@@ -105,8 +206,52 @@ const fetchUser = async (url) => {
 </table>
 
 </div>
-
+    {/*Pagination*/}
+    {totalPages > 1? (<>
+                <div className="pagination" style={{marginTop: "-40px", justifyContent: "center"}}>
+                  <p
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    <IoIosArrowBack
+                      className={
+                        currentPage === 1
+                          ? "paginationBtndisabled"
+                          : "paginationBtn"
+                      }
+                    />
+                  </p>
+                  <span style={{ fontSize: "16px", letterSpacing: "2px" }}>
+                    {currentPage}/{totalPages}
+                  </span>
+                  <p
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    <IoIosArrowForward
+                      className={
+                        currentPage === totalPages
+                          ? "paginationBtndisabled"
+                          : "paginationBtn"
+                      }      
+                    />
+                  </p>
+                </div>
+                </>):(<></>)}
 </div>
-   
-  )
+</>
+        ) : (<>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <div style={{ textAlign: 'center' }}>
+              <img src={require('./Images/NoDataHome.png')} className="img-fluid" alt="..." style={{ width: '90vw', height: 'auto', maxWidth: '600px' }} />
+              <p style={{ fontSize: '25px', fontWeight: '500', color: '#A6A6A6', marginTop: '-70px' }}>User not found</p>
+            </div>
+          </div>
+        </>)}
+  </>)}
+  <ToastContainer
+      position="top-center"
+      autoClose={5000}
+      />
+  </>)
 }
