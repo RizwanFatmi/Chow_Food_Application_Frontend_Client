@@ -75,37 +75,37 @@ export default function Food({ food }) {
   return (
     <>
       <div>
-        <div className="card shadow" style={{ maxWidth: '300px', border: "none", borderRadius: "10px" }}>
-          <img src={food.image} className="card-img-top" alt="..." style={{ height: '200px', width: "300px", borderRadius: "10px 10px 0 0" }} />
-          <div className="card-body">
-            <p className="card-title" style={{ fontSize: "18px", fontWeight: "500", color: "#343434" }}>{truncateName(food.name, 27)}</p>
-            <p className="card-text" style={{ fontSize: "14px", fontWeight: "400", color: "#808080", marginTop: "-8px" }}>{truncateName(food.description, 43)}</p>
-            <p className="card-title" style={{ fontSize: "17px", fontWeight: "500", color: "#343434" }}>₹ {food.price}.00</p>
-            <div className="row">
-              <div className="col">
-                <input
-                  type="number"
-                  className="px-2"
-                  id={`quantity-${food._id}`} // Unique ID for quantity input field
-                  name="quantity"
-                  min={1}
-                  max={5}
-                  maxLength={1}
-                  onChange={handleInputs}
-                  value={cartData[food._id] || ''} // Controlled input value
-                  placeholder="Quantity"
-                  style={{ width: "100%", borderRadius: "5px", outline: "none", marginTop: "1px", border: "1px solid gray" }}
-                />
-              </div>
-              <div className="col">
-              {loading?
-      <button className="navButton" style={{ borderRadius: '5px', width: "100%", height: "30px"}}>Buy</button>  :
-     <button className="navButton" onClick={addToCart} style={{ borderRadius: '5px', width: "100%", height: "30px" }}>Buy</button> 
-   }
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="card shadow" style={{ width: "auto", border: "none", borderRadius: "10px", overflow: "hidden" }}>
+  <img src={food.image} alt="..." style={{ height: "220px", width: "100%", objectFit: "cover" }} />
+  <div className="card-body">
+    <p style={{ fontSize: "19px", fontWeight: "500", color: "#343434" }}>{truncateName(food.name, 27)}</p>
+    <p style={{ fontSize: "13px", fontWeight: "400", color: "#808080", marginTop: "-15px", lineHeight: "18px", height: "40px", marginBottom: "5px" }}>{truncateName(food.description, 75)}</p>
+    <p style={{ fontSize: "17px", fontWeight: "500", color: "#343434" }}>₹ {food.price}.00</p>
+    <div className="row">
+      <div className="col">
+        <input
+          type="number"
+          id={`quantity-${food._id}`}
+          name="quantity"
+          min={1}
+          max={5}
+          onChange={handleInputs}
+          value={cartData[food._id] || ''}
+          placeholder="Quantity"
+          style={{ width: "100%", borderRadius: "5px", border: "1px solid gray", outline: "none", padding: "3px 10px" }}
+        />
+      </div>
+      <div className="col">
+        {loading ? (
+          <button className="navButton" style={{ borderRadius: "5px", width: "100%", height: "30px" }}>Buy</button>
+        ) : (
+          <button className="navButton" onClick={addToCart} style={{ borderRadius: "5px", width: "100%", height: "30px" }}>Buy</button>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
       </div>
       <ToastContainer position="top-center" autoClose={5000} />
     </>

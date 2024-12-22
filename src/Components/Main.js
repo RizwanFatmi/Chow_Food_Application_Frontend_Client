@@ -43,13 +43,14 @@ useEffect(() => {
           <>
            <img src={require('./Images/CR01.jpg')} className="img-fluid" alt="..." />
             <p style={{ fontSize: "25px", textAlign: "center", fontWeight: "900", color: '#2980B9' }}>Choose your food</p>
-            <div className="FoodList mx-auto" style={{ display: "flex", flexWrap: "wrap", maxWidth: "1320px" }}>
-              {FoodArray.map((food, index) => (
-                <div className="FoodMapOfLandingPage" key={index}>
-                  <Food food={food} />
-                </div>
-              ))}
-            </div>
+            <div className="FoodList mx-auto" style={{display: "grid", gap: "0px", maxWidth: "1320px", padding: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))"}}>
+  {FoodArray.map((food, index) => (
+    <div className="FoodMapOfLandingPage" key={index}>
+      <Food food={food} />
+    </div>
+  ))}
+</div>
+
           </>
         ) : (<>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>

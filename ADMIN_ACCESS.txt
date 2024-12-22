@@ -1,4 +1,4 @@
 Use this credential for ADMIN login:
 
-ID:       info@chowfood.com
+ID: info@chowfood.com
 Password: chow@food!21

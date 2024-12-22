@@ -5,6 +5,8 @@ import { logoutUser } from "../actions/userActions";
 import { CgShoppingCart } from "react-icons/cg";
 import { TiDocumentText } from "react-icons/ti";
 import { LuLogOut } from "react-icons/lu";
+import { FcAbout } from "react-icons/fc";
+
 
 
 
@@ -15,6 +17,7 @@ export default function Navbar() {
   const dispatch = useDispatch();
   const location = useLocation();
   const userType = localStorage.getItem('UserType');
+  const [admin, setAdmin] = useState(false);
   
 
   const LogoutUser = () => {
@@ -40,7 +43,7 @@ export default function Navbar() {
 
 
 
-  return (
+  return (<>
     <div>
 
   <nav className="navbar navbar-expand-lg navbar-light bg-light shadow p-0 mb-5 bg-body rounde py-2" >
@@ -136,5 +139,24 @@ export default function Navbar() {
   </div>
 </nav>
     </div>
-  )
+    {admin? (<>
+      <div id="adminBox" style={{position: "absolute", zIndex: "1",marginTop: "60px", marginLeft: "10px", border: '1px solid #ccc', padding: '10px', backgroundColor: 'white', width: '300px', borderRadius: '10px' }}>
+      <span style={{ position: 'absolute', top: '-10px', right: '5px', cursor: 'pointer', fontSize: '30px', color: 'red' }} onClick={() => setAdmin(false)}>&times;</span>
+      <div style={{textAlign: "center"}}><strong>Use this credential for <br/>ADMIN LOGIN:</strong></div>
+      <div style={{marginTop: "20px"}}><strong>ID:</strong> info@chowfood.com</div>
+      <div><strong>Password:</strong> chow@food!21</div>
+    </div>
+    </>):(<>
+    <FcAbout onClick={()=>setAdmin(true)} style={{zIndex: "1", marginTop: "60px", position: "absolute", fontSize: "40px", marginLeft: "6px", color: "#ff6347", animation: "movingGlow 1.5s ease-in-out infinite", boxShadow: "0 0 5px rgba(255, 99, 71, 1)" }} />
+<style>
+  {`
+    @keyframes movingGlow {
+      0% { box-shadow: 0 0 5px rgb(83, 178, 255), 0 0 10px rgb(83, 178, 255), 0 0 15px rgb(83, 178, 255); border-radius: 5px }
+      50% { box-shadow: 0 0 15px rgb(83, 178, 255), 0 0 30px rgb(83, 178, 255), 0 0 45px rgb(83, 178, 255); border-radius: 5px }
+      100% { box-shadow: 0 0 5px rgb(83, 178, 255), 0 0 10px rgb(83, 178, 255), 0 0 15px rgb(83, 178, 255); border-radius: 5px }
+    }
+  `}
+</style>
+</>)}
+    </>)
 }
